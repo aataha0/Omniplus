@@ -3,5 +3,3 @@ node_modules
 typings
 dist
 package-lock.json
-
-webpack.config.js
