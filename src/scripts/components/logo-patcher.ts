@@ -16,8 +16,10 @@ function getOmniplusLogoElement(): HTMLElement {
     const svg = (<HTMLElement>xmlDocument.firstElementChild);
 
     // Set the svg to its correct size.
-    // No need to touch the size because the element maintains its ratio.
+    // No need to touch the height because the element maintains its ratio.
     svg.style.width = '36px';
+    // Respect existing logo properties
+    svg.style.marginRight = '5px';
 
     return svg;
 }
