@@ -6,7 +6,7 @@ const DESTINATION = path.resolve( __dirname, 'dist' );
 
 module.exports = {
     context: ROOT,
-
+    devtool: 'inline-source-map',
     entry: './scripts/main.ts',
 
     output: {
@@ -37,9 +37,9 @@ module.exports = {
             * LOADERS
             *****************/
             {
-                test: /\.ts$/,
-                exclude: [ /node_modules/ ],
-                use: 'ts-loader'
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
             },
             // CSS Loader
             {
