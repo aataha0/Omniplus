@@ -1,8 +1,10 @@
 import {LeaDocument} from './document';
-import {fetchDocumentFrom, extractCourseCodeAndNameFromCourseTitle} from '../../util/util';
+import {fetchDocumentFrom, extractCourseCodeAndNameFromCourseTitle, getLanguage} from '../../util/util';
 import {ElementBuilder} from '../rendering/element-builder';
 import {Renderable} from '../rendering/renderable';
 import {OverviewRenderInfo} from './render-info';
+import { Badge } from '../rendering/badged-card/badge';
+import { LeaDocumentType } from './document-type';
 
 // Represents a course rendered on the documents overview..
 export class CourseDocumentList extends Renderable<OverviewRenderInfo> {
@@ -58,7 +60,42 @@ export class CourseDocumentList extends Renderable<OverviewRenderInfo> {
             new ElementBuilder({
                 tag: 'div',
                 styleClasses: ['course-name'],
-                text: this.courseName
+                children: [
+                    new ElementBuilder({
+                        tag: 'span',
+                        text: this.courseName
+                    }).build(),
+                    new Badge({
+                        // newTab: true,
+                        // Open the link in a new tab.
+                        styleClasses: ['clickable'],
+                        icon: 'file_download',
+                        href: "#",
+                        title: getLanguage() === "FRA"
+                            ? "Télécharger tous les documents non lus"
+                            : "Download all unread documents",
+                        onclick: () => {
+                            // Download each document and mark it as read.
+                            this.documents
+                                .filter((document) => !document.read)
+                                .filter((document) => document.type !== LeaDocumentType.Link && document.type !== LeaDocumentType.YouTube)
+                                .map((document) => ({
+                                    document,
+                                    anchor: document.domElement.querySelector('a')
+                                }))
+                                .forEach(({ document, anchor }) => {
+                                    anchor.setAttribute('download', document.fileName);
+                                    anchor.click();
+                                    anchor.removeAttribute('download');
+                                    document.markAsRead();
+                                });
+                            // Call for a re-render when the read status has been updated.
+                            this.rerender();
+
+                        }
+                    }).build()
+        
+                ]
             }).build(),
             new ElementBuilder({
                 tag: 'div',

@@ -119,12 +119,16 @@
 
     /* Using flexbox to bottom-align vertically */
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    flex-direction: row;
+    justify-content: space-between;
 
     font-weight: 500;
     /* Give the title some extra space. */
     margin: 4px;
+}
+
+.omniplus-documents-overview .course-list .course-name .clickable {
+    margin-top: auto;
 }
 
 .omniplus-documents-overview .course {

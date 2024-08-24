@@ -11,6 +11,7 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
     description: string;
     read: boolean;
     uploadDate: Date;
+    fileName: string;
     // The href attached to the <a> element on the components that opens it.
     originalOpenAction: string;
     // The actual URL that is supposed to be opened for ease of use.
@@ -18,7 +19,7 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
     type: LeaDocumentType;
 
     constructor(name: string, description: string, read: boolean, uploadDate: Date,
-                originalOpenAction: string, type: LeaDocumentType) {
+                fileName: string, originalOpenAction: string, type: LeaDocumentType) {
         super({
             styleClasses: ['document']
         });
@@ -27,6 +28,7 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
         this.description = description;
         this.read = read;
         this.uploadDate = uploadDate;
+        this.fileName = this.fileName;
         this.originalOpenAction = originalOpenAction;
         this.type = type;
 
@@ -71,7 +73,7 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
 
         const type = LeaDocument.determineDocumentTypeFromOpenAction(originalOpenAction.href, openActionThumbnail.title);
 
-        return new LeaDocument(name, description, read, date, originalOpenAction.href, type);
+        return new LeaDocument(name, description, read, date, openActionThumbnail.title, originalOpenAction.href, type);
     }
 
     // Scrapes all elements from documents page of a given course.
