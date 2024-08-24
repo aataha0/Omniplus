@@ -9,15 +9,33 @@ export function removeHeaderImage() {
 
 // Removes all line break elements that extend the size of the page for no reason.
 export function removeAllLineBreaks() {
-    Array.from(document.querySelectorAll('br'))
+    const subtitleLine2: HTMLElement = document.querySelector("span.sousTitrePageLigne2");
+    if (subtitleLine2) {
+        const subtitleLineBreak = subtitleLine2.previousElementSibling;
+        if (subtitleLineBreak && subtitleLineBreak.tagName === 'BR') {
+            subtitleLine2.style.fontSize = '16px';
+            subtitleLine2.insertAdjacentText('beforeend', ' ');
+            subtitleLineBreak.remove();
+        }
+    }
+
+    // Remove extra line breaks, but not all of them.
+    Array.from(document.querySelectorAll('br + br'))
         .forEach((element) => element.parentElement.removeChild(element));
+}
+
+export function removeEmptySessionOption() {
+    const emptyOption: HTMLElement = document.querySelector('#cntFormulaire_drpChangeSession > option[value=""]');
+    if (emptyOption) {
+        emptyOption.style.display = 'none';
+    }
 }
 
 // Certain Lea pages have an unnecessary print version button.
 export function removePrinterFriendlyButton() {
-    const printerFriendlyButton = document.querySelector('.td-liens');
+    const printerFriendlyButton: HTMLElement = document.querySelector('.td-liens');
     if (printerFriendlyButton) {
-        (<HTMLElement>printerFriendlyButton).style.display = 'none';
+        printerFriendlyButton.style.display = 'none';
     }
 }
 
@@ -33,15 +51,11 @@ export function removeLeaAnchorHoverCSSRule() {
 }
 
 export function autoLogin() {
-    const usernameElement = document.querySelector('#Identifiant');
-    const passwordElement = document.querySelector('#Password');
+    const usernameElement: HTMLInputElement = document.querySelector('#Identifiant');
+    const passwordElement: HTMLInputElement = document.querySelector('#Password');
     // If the elements exist and they have been filled.
-    if (usernameElement && passwordElement) {
-        const username = (<HTMLInputElement>usernameElement).value;
-        const password = (<HTMLInputElement>passwordElement).value;
-        if (username && password) {
-            // Click the login button.
-            (<HTMLButtonElement>document.querySelector('.btn.green')).click();
-        }
+    if (usernameElement.value && passwordElement.value) {
+        // Click the login button.
+        (<HTMLButtonElement>document.querySelector('.btn.green')).click();
     }
 }
