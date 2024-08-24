@@ -11,6 +11,7 @@ Omniplus is a userscript that enhances your Omnivox experience by modifying how 
   - Search for documents.
   - A big button to mark all your documents as read!
   - Added a button on Lea for you to quickly access the documents overview page.
+  - A button to download all of your course's unread documents!
 - Completely reworked and redesigned the grades overview page.
   - Browse all your course assessments and grades in one place.
   - Cleaner, clearer grade progression graphs for every course.
