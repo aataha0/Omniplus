@@ -29,6 +29,10 @@ body {
 
     /* Dark grey, used to indicate the file document type. */
     --dark-grey: #1b1b1b;
+    /* colors for the word, powerpoint and excel document types: */
+    --doc-blue: #1976d2;
+    --xls-green: #2e7d32;
+    --ppt-orange: #d32f2f;
     /* Dark blue, used to indicate the link document type. */
     --dark-blue: #000045;
     /* Dark red, used to indicate the video document type. */

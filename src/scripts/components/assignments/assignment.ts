@@ -4,7 +4,7 @@ import {
     getCurrentLeaRoot,
     getMonthIndexFromShortenedName,
     millisecondsInADay,
-    monthsShortened,
+    getMonthShortenedFromIndex,
     openCenteredPopup,
     quotationMarksRegex
 } from '../../util/util';
@@ -300,7 +300,7 @@ export class Assignment extends BadgedCard<null>{
         //  Come up with a comprehensive system that formats due time within 2 weeks in the most urgent way possible.
         else {
             // Since a school year crosses over winter, we'll include the year always just to be clear.
-            dateString = `${this.dueTime.getDate()} ${monthsShortened[this.dueTime.getMonth()]}, ${this.dueTime.getFullYear()}`;
+            dateString = `${this.dueTime.getDate()} ${getMonthShortenedFromIndex(this.dueTime.getMonth())}, ${this.dueTime.getFullYear()}`;
         }
         // Append the time if specified.
         if (this.dueTimeSpecified) {

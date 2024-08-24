@@ -8,6 +8,10 @@ export function getCurrentLeaRoot(): string {
 
 export const quotationMarksRegex = new RegExp("'.+?'", 'g');
 
+export function getLanguage() {
+    return <"ANG" | "FRA">(new URLSearchParams(location.search).get('L') || 'FRA');
+}
+
 // Fetches and parses a components from the given url.
 export function fetchDocumentFrom(url: string): Promise<Document> {
     return fetch(url).then((response) => response.text())
@@ -15,7 +19,15 @@ export function fetchDocumentFrom(url: string): Promise<Document> {
 }
 
 export function toTitleCase(text: string): string {
-    return text.split(' ').map((word) => word.charAt(0).toUpperCase() + word.substring(1).toLowerCase()).join(' ')
+    switch (getLanguage()) {
+        case 'FRA':
+            const words = text.toLowerCase().split(' ');
+            const firstWord = words[0].charAt(0).toUpperCase() + words[0].substring(1).toLowerCase();
+            return firstWord + ' ' + words.slice(1).join(' ');
+        case 'ANG':
+        default:
+            return text.split(' ').map((word) => word.charAt(0).toUpperCase() + word.substring(1).toLowerCase()).join(' ');
+    }
 }
 
 // Escapes regular tex to regex expression.
@@ -23,22 +35,40 @@ export function regexEscape(text: string): string {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
 
-export const monthsShortened = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-];
+export const monthsShortened = {
+    ANG: [
+        'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+        'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+    ],
+    FRA: [
+        'jan', 'fev', 'mar', 'avr', 'mai', 'jui',
+        'jul', 'aou', 'sep', 'oct', 'nov', 'dec'
+    ]
+};
+export function getMonthShortenedFromIndex(index: number): string {
+    return monthsShortened[getLanguage()][index];
+}
 // Returns the month from its shortened, 3-character representation.
 export function getMonthIndexFromShortenedName(month: string): number {
-    return monthsShortened.indexOf(month);
+    return monthsShortened[getLanguage()].indexOf(month.toLowerCase());
 }
 
-export const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-]
+export const months = {
+    ANG: [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ],
+    FRA: [
+        'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+        'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    ]
+};
+export function getMonthFromIndex(index: number): string {
+    return months[getLanguage()][index];
+}
 // Returns the month from its full name.
 export function getMonthIndexFromName(month: string): number {
-    return months.indexOf(month);
+    return months[getLanguage()].indexOf(month);
 }
 
 
@@ -52,7 +82,7 @@ export function extractCourseCodeAndNameFromCourseTitle(courseTitle: string): [s
     // off the extra space on the right.
     // Pre-split the course code and names, note that Omnivox sometimes uses non-breaking space instead of
     // regular space, hence the use of the \s regex.
-    const courseCodeAndName = courseTitle.split(/section|sect\./g)[0].trim().split(spaceRegex);
+    const courseCodeAndName = courseTitle.split(/section|sect\.|groupe|gr\./g)[0].trim().split(spaceRegex);
     // The course code and name are separated by a space, the first element is the course code.
     const courseCode = courseCodeAndName[0];
     // Since course names may contain spaces, the rest of the elements make up the course.

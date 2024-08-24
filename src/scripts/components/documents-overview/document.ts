@@ -1,7 +1,7 @@
 import {fetchDocumentFrom, getMonthIndexFromShortenedName, quotationMarksRegex, regexEscape} from '../../util/util';
 import {ElementBuilder} from '../rendering/element-builder';
 import {OverviewRenderInfo} from './render-info';
-import {LeaDocumentType} from './document-type';
+import {LeaDocumentType, isFile} from './document-type';
 import {Badge} from '../rendering/badged-card/badge';
 import {BadgedCard} from '../rendering/badged-card/badged-card';
 
@@ -49,12 +49,15 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
         // Fetch the name from the <a> element responsible for the title of the components.
         const name = (<HTMLElement>rowElement.querySelector('.lblTitreDocumentDansListe')).innerText.trim();
         // The description of the child element is in a text node that is the parent of the name element.
-        const description = rowElement.querySelector('.divDescriptionDocumentDansListe')
+        // Check if it actually has a description.
+        const description = rowElement.querySelector('.divDescriptionDocumentDansListe').children.length > 1
             // This means that innerText of the element will also include the name of the components.
             // Luckily, the description text node is the last child of the element.
             // However, this description node's content also includes many `\t` characters at its start and end, which
             // need to be removed with `trim()`.
-            .lastChild.textContent.trim();
+            ? rowElement.querySelector('.divDescriptionDocumentDansListe').lastChild.textContent.trim()
+            // If there is no description, set it to an empty string.
+            : '';
         // The status of the components is indicated by a star icon that appears if it has not been read. Check if that
         // icon is present to see if the components has been read.
         const read = rowElement.querySelector('.classeEtoileNouvDoc') == null;
@@ -63,11 +66,12 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
 
         // The download url of the components is placed in an <a> element that is in the element with the class
         // .colVoirTelecharger.
-        const originalOpenAction = (<HTMLAnchorElement>rowElement.querySelector('.colVoirTelecharger a')).href;
+        const originalOpenAction: HTMLAnchorElement = rowElement.querySelector('.colVoirTelecharger a');
+        const openActionThumbnail: HTMLImageElement = originalOpenAction.querySelector('img');
 
-        const type = LeaDocument.determineDocumentTypeFromOpenAction(originalOpenAction);
+        const type = LeaDocument.determineDocumentTypeFromOpenAction(originalOpenAction.href, openActionThumbnail.title);
 
-        return new LeaDocument(name, description, read, date, originalOpenAction, type);
+        return new LeaDocument(name, description, read, date, originalOpenAction.href, type);
     }
 
     // Scrapes all elements from documents page of a given course.
@@ -87,8 +91,8 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
         return fetchDocumentFrom(url).then((parsedDocument) => LeaDocument.loadFromCourseDocumentPage(parsedDocument));
     }
 
-    // Determines the type of the document from the href of the anchor element that opens it.
-    static determineDocumentTypeFromOpenAction(href: String): LeaDocumentType {
+    // Determines the type of the document from the href of the anchor element that opens it, and the title/alt text of the thumbnail image.
+    static determineDocumentTypeFromOpenAction(href: string, title: string): LeaDocumentType {
         // Both file and link documents have a link in their href that includes
         // VisualiseDocument.aspx.
         if (href.includes('VisualiseDocument.aspx')) {
@@ -107,8 +111,25 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
             // a new tab to directly download the document. Their links look
             // something like this:
             // VisualiseDocument.aspx?...
+            // We now attempt to determine the type of the file based on the file extension, hoping it exists.
             else {
-                return LeaDocumentType.File;
+                // We do this instead of title.split('.')[1] in case there are multiple dots in the title.
+                const splitTitle = title.split('.');
+                switch (splitTitle[splitTitle.length - 1]) {
+                    case 'pdf':
+                        return LeaDocumentType.PDF;
+                    case 'doc':
+                    case 'docx':
+                        return LeaDocumentType.Word;
+                    case 'ppt':
+                    case 'pptx':
+                        return LeaDocumentType.PowerPoint;
+                    case 'xls':
+                    case 'xlsx':
+                        return LeaDocumentType.Excel;
+                    default:
+                        return LeaDocumentType.File;
+                }
             }
         }
         // Both YouTube and media document types have the href containing a
@@ -139,6 +160,10 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
         const openActionDecoded = decodeURIComponent(openAction);
         switch (type) {
             case LeaDocumentType.File:
+            case LeaDocumentType.PDF:
+            case LeaDocumentType.Word:
+            case LeaDocumentType.PowerPoint:
+            case LeaDocumentType.Excel:
                 // Files do not need any modifications.
                 return new Promise((resolve) => resolve(openAction));
             case LeaDocumentType.Link:
@@ -186,7 +211,12 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
         // from <Month> <Day>, <Year> to <Month> <Date>, <Year>
         // For the first case, there is no space between the "since" and the month, so it is necessary to trim the
         // since out and then fetch the month, day, and year from the indices 0, 1, and 2.
+        // ---
+        // For Brebeuf's page, I've only encountered the following date format:
+        // depuis le[newline]<Day> <Month> <Year>
+        // Mostly the same thing as Marianopolis' parsing, except there's no comma to remove.
         if (dateString.startsWith('since')) {
+            // Handle Marianopolis' first case.
             // \u00A0 is a non-breaking space.
             // Trim out the first 5 characters ('since').
             const words = dateString.substring(5).split(/[\u00A0 \n]/g);
@@ -197,7 +227,17 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
             const year = parseInt(words[2]);
 
             return new Date(year, month, day);
+        } else if (dateString.startsWith('depuis le')) {
+            // Handle Brebeuf, and likely other french CEGEPs.
+            const words = dateString.substring(9).split(/[\u00A0 \n]/g);
+            // See corresponding variable above: no need to remove the comma.
+            const day = parseInt(words[0]);
+            const month = getMonthIndexFromShortenedName(words[1]);
+            const year = parseInt(words[2]);
+
+            return new Date(year, month, day);
         } else {
+            // Handle Marianopolis' second case.
             const words = dateString.split(/[\u00A0 \n]/g);
             const month = getMonthIndexFromShortenedName(words[1]);
             const day = parseInt(words[2].substring(0, words[2].length - 1));
@@ -214,7 +254,7 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
             this.read = true;
 
             // If this is a file, fetch on the download link directly.
-            if (this.type == LeaDocumentType.File) {
+            if (isFile(this.type)) {
                 fetch(this.url);
             } else {
                 // Otherwise fetch the first quoted part in the open action to mark the document as read.
@@ -229,7 +269,14 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
     get documentIconTypeStyleClass(): string {
         switch (this.type) {
             case LeaDocumentType.File:
+            case LeaDocumentType.PDF:
                 return 'file-background';
+            case LeaDocumentType.Word:
+                return 'word-background';
+            case LeaDocumentType.PowerPoint:
+                return 'powerpoint-background';
+            case LeaDocumentType.Excel:
+                return 'excel-background';
             case LeaDocumentType.Link:
                 return 'link-background';
             case LeaDocumentType.Video:
@@ -242,7 +289,15 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
     get documentTypeIcon(): string {
         switch (this.type) {
             case LeaDocumentType.File:
+                return 'attach_file'
+            case LeaDocumentType.PDF:
+                return 'picture_as_pdf';
+            case LeaDocumentType.Word:
                 return 'description';
+            case LeaDocumentType.PowerPoint:
+                return 'slideshow';
+            case LeaDocumentType.Excel:
+                return 'table_chart';
             case LeaDocumentType.Link:
                 return 'link';
             case LeaDocumentType.Video:
@@ -256,13 +311,16 @@ export class LeaDocument extends BadgedCard<OverviewRenderInfo> {
     get documentActionIcon(): string {
         switch (this.type) {
             case LeaDocumentType.File:
+            case LeaDocumentType.PDF:
+            case LeaDocumentType.Word:
+            case LeaDocumentType.PowerPoint:
+            case LeaDocumentType.Excel:
                 return 'file_download';
             case LeaDocumentType.Link:
+            case LeaDocumentType.YouTube:
                 return 'open_in_new';
             case LeaDocumentType.Video:
                 return 'play_circle';
-            case LeaDocumentType.YouTube:
-                return 'open_in_new';
         }
     }
 
