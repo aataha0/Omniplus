@@ -19,7 +19,7 @@ injectOmniplusLogo();
 
 
 // If the script is being run on Lea.
-if (window.location.href.includes('ovx.omnivox.ca')) {
+if (window.location.href.includes('-lea.omnivox.ca')) {
     injectDocumentsOverviewButtonToLea();
     removeLeaAnchorHoverCSSRule();
 
