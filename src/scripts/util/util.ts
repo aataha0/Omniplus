@@ -41,8 +41,8 @@ export const monthsShortened = {
         'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
     ],
     FRA: [
-        'jan', 'fev', 'mar', 'avr', 'mai', 'jui',
-        'jul', 'aou', 'sep', 'oct', 'nov', 'dec'
+        'jan', 'fév', 'mar', 'avr', 'mai', 'jui',
+        'jul', 'aoû', 'sep', 'oct', 'nov', 'déc'
     ]
 };
 export function getMonthShortenedFromIndex(index: number): string {
