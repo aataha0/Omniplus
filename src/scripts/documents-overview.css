@@ -128,7 +128,8 @@
 }
 
 .omniplus-documents-overview .course-list .course-name .clickable {
-    margin-top: auto;
+    margin-top: 4px;
+    margin-bottom: auto;
 }
 
 .omniplus-documents-overview .course {
