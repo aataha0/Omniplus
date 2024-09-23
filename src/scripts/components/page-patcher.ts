@@ -59,3 +59,26 @@ export function autoLogin() {
         (<HTMLButtonElement>document.querySelector('.btn.green')).click();
     }
 }
+
+export function brebeufRemoveHighSchoolLogin() {
+    const loginButtonContainer: HTMLElement = document.querySelector('.container-roles.nb-roles-3');
+    if (loginButtonContainer) {
+        const highSchoolLoginButton: HTMLElement = loginButtonContainer.querySelector('#role-1');
+        if (highSchoolLoginButton) {
+            highSchoolLoginButton.remove();
+
+            loginButtonContainer.classList.remove('nb-roles-3');
+            loginButtonContainer.classList.add('nb-roles-2');
+
+            if (localStorage.getItem('login-role-selected') === 'role-1') {
+                localStorage.setItem('login-role-selected', 'role-2');
+                location.reload();
+            }
+        }
+    
+        const cegepLoginButton: HTMLElement = loginButtonContainer.querySelector('#role-2');
+        if (cegepLoginButton) {
+            cegepLoginButton.textContent = "Étudiants"
+        }
+    }
+}

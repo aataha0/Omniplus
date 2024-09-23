@@ -4,6 +4,7 @@ import {injectOmniplusLogo} from './components/logo-patcher';
 import {injectDocumentsOverviewButtonToLea} from './components/documents-overview/overview-button';
 import {
     autoLogin,
+    brebeufRemoveHighSchoolLogin,
     removeAllLineBreaks,
     removeHeaderImage,
     removeLeaAnchorHoverCSSRule
@@ -65,5 +66,6 @@ else {
     // If this is the login page.
     if (window.location.href.includes('Login')) {
         autoLogin();
+        brebeufRemoveHighSchoolLogin();
     }
 }
