@@ -13,7 +13,7 @@ const domParser = new DOMParser();
 
 function getOmniplusLogoElement(): HTMLElement {
     const xmlDocument = domParser.parseFromString(omniplusLogoSource, 'image/svg+xml');
-    const svg = (<HTMLElement>xmlDocument.firstElementChild);
+    const svg = <HTMLElement>xmlDocument.firstElementChild;
 
     // Set the svg to its correct size.
     // No need to touch the height because the element maintains its ratio.
@@ -25,12 +25,19 @@ function getOmniplusLogoElement(): HTMLElement {
 }
 
 export function injectOmniplusLogo() {
-    const omnivoxLogoContainer = document.querySelector('#headerOmnivoxLogo');
+    const omnivoxLogoContainer: HTMLElement = document.querySelector('#headerOmnivoxLogo');
     if (omnivoxLogoContainer) {
         const originalLogo = omnivoxLogoContainer.querySelector('img');
         // Put the new logo before the original logo.
         omnivoxLogoContainer.insertBefore(getOmniplusLogoElement(), originalLogo);
         // Remove the original logo.
         omnivoxLogoContainer.removeChild(originalLogo);
+    }
+
+    const loginHeaderLogoContainer: HTMLElement = document.querySelector('.header-title-identification-intraflex');
+    if (loginHeaderLogoContainer) {
+        const blob = new Blob([omniplusLogoSource], { type: "image/svg+xml" });
+        const url = URL.createObjectURL(blob);
+        loginHeaderLogoContainer.style.background = `url(${url}) left / 76px  no-repeat `;
     }
 }
