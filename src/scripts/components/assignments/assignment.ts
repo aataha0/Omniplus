@@ -144,14 +144,21 @@ export class Assignment extends BadgedCard<null>{
     static extractDueDateFromAssignmentListDateString(dueDateString: string): {dueTime: Date, timeSpecified: boolean} {
         // Due times on the assignment list have the following format:
         // <Month Shortened>-<Date>, <Year> [at] [hh:mm]
+        // for Brébeuf, it looks more like <Date>-<Month Shortened>-<Year> 
         // Where the time of the day can be entirely optional.
         const splits = dueDateString.split('at').map((part) => part.trim());
         // If the time is specified, the "at" will be present and the split will have 2 pieces.
         const timeSpecified = splits.length > 1;
         const [dateString, timeString] = splits;
 
-        const [datePart, yearString] = dateString.split(',').map((part) => part.trim());
-        const [monthShortened, dayString] = datePart.split('-');
+        let dayString, monthShortened, yearString;
+        if (dueDateString.includes(',')) {
+            let [datePart, _yearString] = dateString.split(',').map((part) => part.trim());
+            [monthShortened, dayString] = datePart.split('-');
+            yearString = _yearString;
+        } else {
+            [dayString, monthShortened, yearString] = dateString.split('-').map((part) => part.trim());
+        }
 
         const monthIndex = getMonthIndexFromShortenedName(monthShortened);
         const day = parseInt(dayString);
@@ -202,6 +209,33 @@ export class Assignment extends BadgedCard<null>{
 
     // The instruction badge is the first badge on the right.
     buildInstructionBadge(): Badge {
+        // const getPdfUrl = async () => {
+        //     const url = new URL(this.instructionLink);
+        //     const filename = url.pathname.split('/').pop();
+
+        //     const blob = await fetch(url).then(res=>res.blob());
+
+        //     const formData = new FormData();
+        //     formData.append('files[0]', blob);
+        //     if (filename.endsWith(".ppt") || filename.endsWith(".pptx")) {
+        //         formData.append('landscape', 'true');
+        //     }
+
+        //     const responseBlob = await fetch('https://demo.gotenberg.dev/forms/libreoffice/convert', {
+        //         method: 'POST',
+        //         body: formData
+        //     }).then(res=>res.blob());
+
+        //     const downloadUrl = URL.createObjectURL(responseBlob);
+
+        //     const a = document.createElement('a');
+        //     a.href = downloadUrl;
+        //     a.download = filename.replace(/%20/g, ' ').split('.').slice(0, -1).join('.') + '.pdf';
+        //     document.body.appendChild(a);
+        //     a.click();
+        //     document.body.removeChild(a);
+        // }
+
         // Return a clickable badge that leads to the instructions if instructions are available.
         // If no instruction is given, the button will not be interactive, and a tooltip will indicate that no
         // instructions are attached.
