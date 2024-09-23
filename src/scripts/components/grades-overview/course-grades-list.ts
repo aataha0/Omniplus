@@ -89,7 +89,7 @@ export class CourseGradesList extends Renderable<null> {
 
         // To extract the student's current grade, we can take advantage of the fact that it is the only element
         // within the table that is inside a font that is inside a font:
-        const currentGrade = this.extractDecimalFromOverviewPercentageElement(page.querySelector('.tb-sommaire font font'))
+        const currentGrade = this.extractDecimalFromOverviewPercentageElement(page.querySelector('.tb-sommaire td[align=RIGHT][valign=TOP] font'))
 
         // To extract the class numbers (average, median, deviation), use the fact that they are in a separate
         // table, and are all the last elements of their parent.
@@ -145,7 +145,9 @@ export class CourseGradesList extends Renderable<null> {
         return this.hasAverage && this.hasStandardDeviation;
     }
     get zScore(): number {
-        return (this.currentGrade - this.classAverage) / this.standardDeviation;
+        // Account for the case where the student doesn't have all of their grades yet.
+        const currentGrade = (this.currentGrade / this.assessments.reduce((sum, assessment) => sum + (assessment.hasGrade ? assessment.weight : 0), 0));
+        return (currentGrade - this.classAverage) / this.standardDeviation;
     }
 
     updateDomElement(): void {

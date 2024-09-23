@@ -58,7 +58,7 @@ export class Assessment extends Renderable<null> {
 
         // To obtain the information we need, we have to extract the 3rd to the 6th element of the row.
         const nameElement = <HTMLElement>element.childNodes.item(2);
-        const name = (<HTMLElement>nameElement.firstElementChild).innerText;
+        const name = (<HTMLElement>nameElement.firstElementChild).textContent;
 
         const counted = !nameElement.innerText.includes('This mark will be discarded');
 
@@ -75,7 +75,14 @@ export class Assessment extends Renderable<null> {
         // The weight is displayed first in percentage "Weight%" alongside with the weighted vs. actual grade.
         // Extract the percentage from the first element, remove the percentage, and divide it by 100 to get the
         // actual ratio.
-        const weight = parseFloat((<HTMLElement>weightElement.firstElementChild).innerText.replace('%', '')) / 100;
+        let weight;
+        if (weightElement.firstElementChild !== null) {
+            console.log("No weight found for element", element.textContent)
+            weight = parseFloat((<HTMLElement>weightElement.firstElementChild).innerText.replace('%', '')) / 100;
+        } else {
+            // This happened for an absences row, so I'll set it as N/A in such cases.
+            weight = NaN;
+        }
 
         return new Assessment(name, weight, counted, grade, average);
     }
