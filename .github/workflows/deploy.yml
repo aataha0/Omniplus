@@ -50,8 +50,8 @@ jobs:
           // @icon         https://www.google.com/s2/favicons?domain=omnivox.ca
           // @grant        none
           // @license      MIT
-          // @downloadURL https://update.greasyfork.org/scripts/440685/Omniplus.user.js
-          // @updateURL  https://update.greasyfork.org/scripts/440685/Omniplus.meta.js
+          // @downloadURL https://adntaha.github.io/Omniplus/omniplus.user.js
+          // @updateURL  https://adntaha.github.io/Omniplus/omniplus.user.js
           // ==/UserScript==
           " | cat - dist/main.bundle.js > public/omniplus.user.js
 
