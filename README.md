@@ -1,4 +1,4 @@
-# Omniplus
+# [Omniplus](https://adntaha.github.io/Omniplus/omniplus.user.js)
 
 Omniplus is a userscript that enhances your Omnivox experience by modifying how the site looks and organising its content differently.
 
